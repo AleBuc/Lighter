@@ -12,7 +12,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException {
         logger.info("Run database");
-        EmbedMongoConfiguration configuration = new EmbedMongoConfiguration();
+        EmbedMongoConfiguration configuration = EmbedMongoConfiguration.getInstance();
         configuration.startMongoDB();
     }
 }
