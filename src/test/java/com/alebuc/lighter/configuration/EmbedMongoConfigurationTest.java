@@ -4,8 +4,12 @@ import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
 import de.flapdoodle.reverse.TransitionWalker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
@@ -20,56 +24,35 @@ import java.util.concurrent.TimeoutException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class EmbedMongoConfigurationTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class EmbedMongoConfigurationTest {
 
     private final EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
-    private static InputStream originalSystemIn;
-    private ByteArrayInputStream simulatedSystemIn;
 
-    @BeforeAll
-    public static void setup() {
-        originalSystemIn = System.in;
-    }
     @AfterAll
     public static void tearDown() {
-        System.setIn(originalSystemIn);
+        EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+        if (embedMongoConfiguration.getRunning() != null && embedMongoConfiguration.getRunning().current().isAlive()) {
+            embedMongoConfiguration.getRunning().close();
+        }
     }
 
     @Test
-    void startAndStopDatabase() throws IOException, InterruptedException, ExecutionException, TimeoutException {
-        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
-
-            try {
-                embedMongoConfiguration.startMongoDB();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        });
-
-        wait(completableFuture);
-
-        TransitionWalker.ReachedState<RunningMongodProcess> running = embedMongoConfiguration.getRunning();
-        assertThat(running.current().isAlive()).isTrue();
-
-
-        simulatedSystemIn = new ByteArrayInputStream("\n\r".getBytes());
-        System.setIn(simulatedSystemIn);
-        Scanner scanner = new Scanner(System.in);
-        System.out.println(scanner.nextLine());
-
-        wait(completableFuture);
-
-        assertThat(running.current().isAlive()).isFalse();
-
-
+    @Order(1)
+    void shouldStartDatabase() {
+        assertThat(embedMongoConfiguration.getRunning()).isNull();
+        embedMongoConfiguration.startMongoDB();
+        assertThat(embedMongoConfiguration.getRunning()).isNotNull();
+        assertThat(embedMongoConfiguration.getRunning().current().isAlive()).isTrue();
+        assertThat(embedMongoConfiguration.getConnectionString()).isNotNull();
     }
 
-    private void wait(CompletableFuture<Void> completableFuture) throws ExecutionException, InterruptedException {
-        try {
-            completableFuture.get(10, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-
-        }
+    @Test
+    @Order(2)
+    void shouldStopDatabase() {
+        assertThat(embedMongoConfiguration.getRunning()).isNotNull();
+        embedMongoConfiguration.closeMongoDB();
+        assertThat(embedMongoConfiguration.getRunning().current().isAlive()).isFalse();
     }
+
 }
