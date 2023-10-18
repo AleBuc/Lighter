@@ -1,6 +1,6 @@
 package com.alebuc.lighter;
 
-import com.alebuc.lighter.configuration.EmbedMongoConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -9,10 +9,10 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-@CommandLine.Command(name = "lighter", mixinStandardHelpOptions = true,
+@Slf4j
+@CommandLine.Command(name = "lighter", subcommands = {Runner.class},
         description = "Run an throwable embedded MongoDB database.", versionProvider = Lighter.PropertiesVersionProvider.class)
 public class Lighter implements Callable<String> {
-    private static final Logger log = Logger.getGlobal();
 
     @CommandLine.Option(names = {"-V", "--version"}, versionHelp = true, description = "Print Lighter version.")
     boolean versionDisplay;
