@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 @Slf4j
 @CommandLine.Command(name = "lighter", subcommands = {Runner.class},
@@ -17,29 +16,21 @@ public class Lighter implements Callable<String> {
     @CommandLine.Option(names = {"-V", "--version"}, versionHelp = true, description = "Print Lighter version.")
     boolean versionDisplay;
 
-    public String call() {
-        CommandLine.usage(this, System.out);
-        log.info("Run database.");
-        EmbedMongoConfiguration configuration = EmbedMongoConfiguration.getInstance();
-        configuration.startMongoDB();
-        log.info("------ Connection string: " + configuration.getConnectionString() + " ------");
-        try {
-            try {
-                System.in.read();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    @CommandLine.Option(names = {"-h", "--help"},
+            usageHelp = true,
+            description = "Display this help message.")
+    boolean usageHelpRequested;
 
-        } finally {
-            log.info("Closing database.");
-            configuration.closeMongoDB();
-        }
-        log.info("Stopping the app.");
+    public String call() {
         return null;
     }
 
     public static void main(String[] args) {
-        new CommandLine(new Lighter()).execute(args);
+        if (args != null && args.length >0){
+            new CommandLine(new Lighter()).execute(args);
+        } else {
+            new CommandLine(new Lighter()).execute("--help");
+        }
     }
 
     static class PropertiesVersionProvider implements CommandLine.IVersionProvider {
