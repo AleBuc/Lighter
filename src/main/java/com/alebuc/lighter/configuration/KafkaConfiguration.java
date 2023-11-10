@@ -6,20 +6,10 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.util.Properties;
 
-public class KafkaConfiguration {
+public enum KafkaConfiguration {
+    INSTANCE;
 
     private static final String GROUP_ID = "Lighter";
-
-    private KafkaConfiguration() {
-    }
-
-    private static final class InstanceHolder {
-        private static final KafkaConfiguration instance = new KafkaConfiguration();
-    }
-
-    public static KafkaConfiguration getInstance() {
-        return InstanceHolder.instance;
-    }
 
     private Properties getConsumerProperties(String bootstrapServer) {
         Properties properties = new Properties();
@@ -34,6 +24,9 @@ public class KafkaConfiguration {
 
     public KafkaConsumer<String, Object> getConsumer(String bootstrapServer) {
         return new KafkaConsumer<>(getConsumerProperties(bootstrapServer));
+    }
+    public static KafkaConfiguration getInstance() {
+        return INSTANCE;
     }
 
 }

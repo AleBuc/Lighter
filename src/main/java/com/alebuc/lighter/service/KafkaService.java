@@ -13,24 +13,14 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
-public class KafkaService {
+public enum KafkaService {
+    INSTANCE;
 
     private boolean isListening = false;
 
-    private KafkaService() {
-    }
-
-    private static final class InstanceHolder {
-        private static final KafkaService instance = new KafkaService();
-    }
-
-    public static KafkaService getInstance() {
-        return KafkaService.InstanceHolder.instance;
-    }
-
     public void consumeTopic(String bootstrapServer, String topic) {
         isListening = true;
-        KafkaConfiguration kafkaConfiguration = KafkaConfiguration.getInstance();
+        KafkaConfiguration kafkaConfiguration = KafkaConfiguration.INSTANCE;
         KafkaConsumer<String, Object> consumer = kafkaConfiguration.getConsumer(bootstrapServer);
         try (consumer) {
             consumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {

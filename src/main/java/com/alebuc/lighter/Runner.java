@@ -19,7 +19,7 @@ public class Runner implements Callable<String> {
     String topic = "";
 
     private final EmbedMongoConfiguration mongoConfiguration = EmbedMongoConfiguration.getInstance();
-    private final KafkaService kafkaService = KafkaService.getInstance();
+    private static final KafkaService kafkaService = KafkaService.INSTANCE;
 
     @Override
     public String call() throws Exception {
@@ -33,7 +33,8 @@ public class Runner implements Callable<String> {
             try {
                 System.in.read();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.error("Error during the system input capture. Stopping the app.", e);
+                throw new IllegalArgumentException(e);
             }
 
         } finally {
