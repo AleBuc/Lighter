@@ -32,7 +32,7 @@ public class EmbedMongoConfiguration {
     private ConnectionString connectionString;
 
     public void startMongoDB() {
-        Transitions transitions = Mongod.instance().transitions(Version.Main.V4_4)
+        Transitions transitions = Mongod.instance().transitions(Version.Main.V6_0)
                 .replace(Start.to(ProcessOutput.class).initializedWith(ProcessOutput.silent()).withTransitionLabel("no output"));
         running = transitions.walker().initState(StateID.of(RunningMongodProcess.class));
         connectionString = createConnectionString(running.current().getServerAddress());
