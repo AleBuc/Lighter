@@ -22,7 +22,7 @@ public class Runner implements Callable<String> {
     private static final KafkaService kafkaService = KafkaService.INSTANCE;
 
     @Override
-    public String call() throws Exception {
+    public String call() {
         CommandLine.usage(this, System.out);
         mongoConfiguration.startMongoDB();
         Thread consumerThread = new Thread(() -> kafkaService.consumeTopic(serverAddress, topic));
