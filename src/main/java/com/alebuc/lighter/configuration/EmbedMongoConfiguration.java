@@ -14,6 +14,7 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+@Getter
 public class EmbedMongoConfiguration {
 
     private EmbedMongoConfiguration() {
@@ -29,7 +30,6 @@ public class EmbedMongoConfiguration {
 
     private TransitionWalker.ReachedState<RunningMongodProcess> running;
 
-    @Getter
     private ConnectionString connectionString;
 
     public void startMongoDB() {

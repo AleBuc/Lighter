@@ -1,6 +1,8 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import com.alebuc.lighter.entity.EventEntity;
+import com.alebuc.lighter.repository.EventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -9,8 +11,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 public enum KafkaService {
@@ -22,6 +26,7 @@ public enum KafkaService {
         isListening = true;
         KafkaConfiguration kafkaConfiguration = KafkaConfiguration.INSTANCE;
         KafkaConsumer<String, Object> consumer = kafkaConfiguration.getConsumer(bootstrapServer);
+        EventRepository eventRepository = EventRepository.INSTANCE;
         try (consumer) {
             consumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {
                 @Override
@@ -35,9 +40,12 @@ public enum KafkaService {
             });
             while (isListening) {
                 ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(100));
+                List<EventEntity> eventEntities = new ArrayList<>();
                 for (ConsumerRecord<String, Object> event : records) {
                     log.info("New event! Key: {}, Value: {}", event.key(), event.value());
+                    eventEntities.add(EventEntity.fromConsumerRecord(event));
                 }
+                eventRepository.saveEvents(eventEntities);
             }
         }
     }

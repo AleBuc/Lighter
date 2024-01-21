@@ -11,10 +11,12 @@ import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
+import java.util.List;
+
 public enum EventRepository {
     INSTANCE;
 
-    private MongoCollection<EventEntity<?, ?>> collection;
+    private MongoCollection<EventEntity> collection;
     private final CodecRegistry pojoCodecRegistry = CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build());
     private final CodecRegistry codecRegistry = CodecRegistries.fromProviders(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
     private final MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
@@ -26,10 +28,14 @@ public enum EventRepository {
     public void createCollection(String collectionName) {
         MongoDatabase database = mongoClient.getDatabase("Lighter");
         database.createCollection(collectionName);
-        this.collection = (MongoCollection<EventEntity<?, ?>>) database.getCollection(collectionName, EventEntity.class);
+        this.collection = database.getCollection(collectionName, EventEntity.class);
     }
 
-    public void saveEvent(EventEntity<?, ?> eventEntity) {
+    public void saveEvent(EventEntity eventEntity) {
         this.collection.insertOne(eventEntity);
+    }
+
+    public void saveEvents(List<EventEntity> eventEntities) {
+        this.collection.insertMany(eventEntities);
     }
 }
