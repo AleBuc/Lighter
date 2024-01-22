@@ -19,7 +19,7 @@ public class Runner implements Callable<String> {
     String topic = "";
 
     private final EmbedMongoConfiguration mongoConfiguration = EmbedMongoConfiguration.getInstance();
-    private static final KafkaService kafkaService = KafkaService.INSTANCE;
+    private static final KafkaService kafkaService = KafkaService.getInstance();
 
     @Override
     public String call() {

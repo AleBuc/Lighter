@@ -22,7 +22,7 @@ public enum KafkaConfiguration {
         return properties;
     }
 
-    public KafkaConsumer<String, Object> getConsumer(String bootstrapServer) {
+    public KafkaConsumer<Object, Object> getConsumer(String bootstrapServer) {
         return new KafkaConsumer<>(getConsumerProperties(bootstrapServer));
     }
 
