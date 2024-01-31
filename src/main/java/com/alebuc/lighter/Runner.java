@@ -2,6 +2,7 @@ package com.alebuc.lighter;
 
 import com.alebuc.lighter.configuration.EmbedMongoConfiguration;
 import com.alebuc.lighter.service.KafkaService;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
@@ -18,8 +19,10 @@ public class Runner implements Callable<String> {
     @CommandLine.Option(names = {"-t", "--topic"}, description = "Topic to consume", required = true)
     String topic = "";
 
-    private final EmbedMongoConfiguration mongoConfiguration = EmbedMongoConfiguration.getInstance();
-    private static final KafkaService kafkaService = KafkaService.getInstance();
+    @Inject
+    private EmbedMongoConfiguration mongoConfiguration;
+    @Inject
+    private KafkaService kafkaService;
 
     @Override
     public String call() {

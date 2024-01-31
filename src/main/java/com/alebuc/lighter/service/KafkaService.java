@@ -1,6 +1,7 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -13,15 +14,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
+@Singleton
 @RequiredArgsConstructor
 public class KafkaService {
-    private static KafkaService INSTANCE;
-    public static KafkaService getInstance(){
-        if (INSTANCE == null) {
-            INSTANCE = new KafkaService(EventService.getInstance());
-        }
-        return INSTANCE;
-    }
     private boolean isListening = false;
     private final EventService eventService;
 

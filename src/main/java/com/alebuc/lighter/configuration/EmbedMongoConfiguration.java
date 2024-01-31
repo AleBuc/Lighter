@@ -10,23 +10,14 @@ import de.flapdoodle.reverse.StateID;
 import de.flapdoodle.reverse.TransitionWalker;
 import de.flapdoodle.reverse.Transitions;
 import de.flapdoodle.reverse.transitions.Start;
+import jakarta.inject.Singleton;
 import lombok.Getter;
 
 import java.util.Objects;
 
 @Getter
+@Singleton
 public class EmbedMongoConfiguration {
-
-    private EmbedMongoConfiguration() {
-    }
-
-    private static final class InstanceHolder {
-        private static final EmbedMongoConfiguration instance = new EmbedMongoConfiguration();
-    }
-
-    public static EmbedMongoConfiguration getInstance() {
-        return InstanceHolder.instance;
-    }
 
     private TransitionWalker.ReachedState<RunningMongodProcess> running;
 

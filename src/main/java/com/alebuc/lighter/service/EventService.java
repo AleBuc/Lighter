@@ -2,6 +2,7 @@ package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.entity.EventEntity;
 import com.alebuc.lighter.repository.EventRepository;
+import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,16 +14,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Singleton
 @RequiredArgsConstructor
 public class EventService {
-    private static EventService INSTANCE;
-    //TODO Test with Jakarta @Inject
-    public static EventService getInstance(){
-        if (INSTANCE == null){
-            INSTANCE = new EventService(EventRepository.INSTANCE);
-        }
-        return INSTANCE;
-    }
 
     private final EventRepository eventRepository;
 
