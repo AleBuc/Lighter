@@ -2,6 +2,9 @@ package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.entity.EventEntity;
 import com.alebuc.lighter.repository.EventRepository;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.http.annotation.Controller;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +17,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Bean
 @Singleton
+@Controller
 @RequiredArgsConstructor
 public class EventService {
 
-    private final EventRepository eventRepository;
+    @Inject
+    private EventRepository eventRepository;
 
     public void saveEvents(ConsumerRecords<Object, Object> records) {
         Optional<String> topicName = records.partitions().stream().map(TopicPartition::topic).distinct().findFirst();

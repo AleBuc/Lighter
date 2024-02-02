@@ -7,9 +7,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
@@ -25,13 +27,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EmbedMongoConfigurationTest {
 
-    private final EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+    @InjectMocks
+    private EmbedMongoConfiguration embedMongoConfiguration;
 
     @AfterAll
-    public static void tearDown() {
-        EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+    public void tearDown() {
         if (embedMongoConfiguration.getRunning() != null && embedMongoConfiguration.getRunning().current().isAlive()) {
             embedMongoConfiguration.getRunning().close();
         }

@@ -1,7 +1,13 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.DefaultScope;
+import io.micronaut.http.annotation.Controller;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -14,12 +20,15 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
+@Bean
 @Singleton
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class KafkaService {
     private boolean isListening = false;
-    private final EventService eventService;
+    @Inject
+    private EventService eventService;
 
+//TODO to test with Micronaut Data MongoDB
     public void consumeTopic(String bootstrapServer, String topic) {
         isListening = true;
         KafkaConfiguration kafkaConfiguration = KafkaConfiguration.INSTANCE;

@@ -1,6 +1,8 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.utils.JsonFormatter;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import jakarta.inject.Inject;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -27,13 +29,13 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-@ExtendWith(MockitoExtension.class)
+@MicronautTest(packages = "com.alebuc.lighter.service")
 @Testcontainers
 class KafkaServiceTest {
-    @InjectMocks
+    @Inject
     private KafkaService kafkaService;
 
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.1"));
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.3"));
 
     String topicName = "testTopic";
     String bootstrapServers;
@@ -77,7 +79,6 @@ class KafkaServiceTest {
 
         try (MockedStatic<EventService> mockedStatic = Mockito.mockStatic(EventService.class)) {
             //WHEN
-            KafkaService kafkaService = KafkaService.getInstance();
             Thread consumptionThread = new Thread(() -> kafkaService.consumeTopic(bootstrapServers, testTopic));
             Thread stopThread = new Thread(kafkaService::stopListener);
             consumptionThread.start();

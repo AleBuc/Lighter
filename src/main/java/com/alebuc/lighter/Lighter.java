@@ -1,5 +1,9 @@
 package com.alebuc.lighter;
 
+import io.micronaut.configuration.picocli.MicronautFactory;
+import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.env.Environment;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
@@ -27,9 +31,9 @@ public class Lighter implements Callable<String> {
 
     public static void main(String[] args) {
         if (args != null && args.length >0){
-            new CommandLine(new Lighter()).execute(args);
+            PicocliRunner.call(Lighter.class, args);
         } else {
-            new CommandLine(new Lighter()).execute("--help");
+            PicocliRunner.call(Lighter.class,"--help");
         }
     }
 
