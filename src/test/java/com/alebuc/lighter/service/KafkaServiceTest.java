@@ -77,7 +77,7 @@ class KafkaServiceTest {
 
         try (MockedStatic<EventService> mockedStatic = Mockito.mockStatic(EventService.class)) {
             //WHEN
-            KafkaService kafkaService = KafkaService.getInstance();
+            KafkaService kafkaService = KafkaService.INSTANCE;
             Thread consumptionThread = new Thread(() -> kafkaService.consumeTopic(bootstrapServers, testTopic));
             Thread stopThread = new Thread(kafkaService::stopListener);
             consumptionThread.start();
@@ -86,7 +86,7 @@ class KafkaServiceTest {
 
             //THEN
             EventService eventService = mock(EventService.class);
-            mockedStatic.verify(() -> eventService.saveEvents(consumerRecordsArgumentCaptor.capture()));
+            mockedStatic.verify(() -> eventService.saveEvents(consumerRecordsArgumentCaptor.capture(), testTopic));
             ConsumerRecords<Object, Object> consumerRecords = consumerRecordsArgumentCaptor.getValue();
             Assertions.assertThat(consumerRecords)
                     .isNotEmpty()

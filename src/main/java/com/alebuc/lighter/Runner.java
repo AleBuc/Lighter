@@ -18,8 +18,8 @@ public class Runner implements Callable<String> {
     @CommandLine.Option(names = {"-t", "--topic"}, description = "Topic to consume", required = true)
     String topic = "";
 
-    private final EmbedMongoConfiguration mongoConfiguration = EmbedMongoConfiguration.getInstance();
-    private static final KafkaService kafkaService = KafkaService.getInstance();
+    private final EmbedMongoConfiguration mongoConfiguration = EmbedMongoConfiguration.INSTANCE;
+    private static final KafkaService kafkaService = KafkaService.INSTANCE;
 
     @Override
     public String call() {

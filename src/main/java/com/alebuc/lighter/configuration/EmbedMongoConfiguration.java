@@ -15,18 +15,8 @@ import lombok.Getter;
 import java.util.Objects;
 
 @Getter
-public class EmbedMongoConfiguration {
-
-    private EmbedMongoConfiguration() {
-    }
-
-    private static final class InstanceHolder {
-        private static final EmbedMongoConfiguration instance = new EmbedMongoConfiguration();
-    }
-
-    public static EmbedMongoConfiguration getInstance() {
-        return InstanceHolder.instance;
-    }
+public enum EmbedMongoConfiguration {
+    INSTANCE;
 
     private TransitionWalker.ReachedState<RunningMongodProcess> running;
 

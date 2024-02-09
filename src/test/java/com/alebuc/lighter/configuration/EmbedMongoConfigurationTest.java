@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EmbedMongoConfigurationTest {
 
-    private final EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+    private final EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.INSTANCE;
 
     @AfterAll
     public static void tearDown() {
-        EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+        EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.INSTANCE;
         if (embedMongoConfiguration.getRunning() != null && embedMongoConfiguration.getRunning().current().isAlive()) {
             embedMongoConfiguration.getRunning().close();
         }

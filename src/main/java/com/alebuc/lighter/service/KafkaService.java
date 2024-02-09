@@ -1,7 +1,6 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -13,17 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
-@RequiredArgsConstructor
-public class KafkaService {
-    private static KafkaService INSTANCE;
-    public static KafkaService getInstance(){
-        if (INSTANCE == null) {
-            INSTANCE = new KafkaService(EventService.getInstance());
-        }
-        return INSTANCE;
-    }
+public enum KafkaService {
+    INSTANCE;
     private boolean isListening = false;
-    private final EventService eventService;
+    private final EventService eventService = EventService.INSTANCE;
 
     public void consumeTopic(String bootstrapServer, String topic) {
         isListening = true;
@@ -43,7 +35,9 @@ public class KafkaService {
             });
             while (isListening) {
                 ConsumerRecords<Object, Object> records = consumer.poll(Duration.ofMillis(100));
-                eventService.saveEvents(records);
+                if (!records.isEmpty()) {
+                    eventService.saveEvents(records, topic);
+                }
             }
         }
     }

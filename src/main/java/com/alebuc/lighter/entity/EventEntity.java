@@ -3,10 +3,12 @@ package com.alebuc.lighter.entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
+import lombok.With;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.record.TimestampType;
+import org.bson.types.ObjectId;
 
 import java.nio.charset.Charset;
 import java.time.Instant;
@@ -16,6 +18,8 @@ import java.util.Map;
 
 @Builder
 public record EventEntity(
+        @With
+        ObjectId id,
         Object key,
         Object value,
         int partition,
