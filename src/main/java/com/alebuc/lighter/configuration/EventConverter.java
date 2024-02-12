@@ -2,18 +2,25 @@ package com.alebuc.lighter.configuration;
 
 import com.alebuc.lighter.entity.EventEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.bson.Document;
 
 import java.util.Date;
 import java.util.Map;
 
 public abstract class EventConverter {
-    private static final ObjectMapper objectMapper = new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    private static final ObjectMapper objectMapper = new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).registerModule(new JavaTimeModule());
 
     public static Document convertToDocument(EventEntity eventEntity) {
-        return new Document(objectMapper.convertValue(eventEntity, Map.class));
+        try {
+            return Document.parse(objectMapper.writeValueAsString(eventEntity));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static EventEntity convertToEvent(Document document) {

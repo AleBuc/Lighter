@@ -1,6 +1,7 @@
 package com.alebuc.lighter.configuration;
 
 import com.alebuc.lighter.entity.EventEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import lombok.NoArgsConstructor;
@@ -65,7 +66,7 @@ public class EventEntityCodec implements CollectibleCodec<EventEntity> {
 
     @Override
     public void encode(BsonWriter writer, EventEntity value, EncoderContext encoderContext) {
-        Document document = EventConverter.convertToDocument(value);
+        Document document =  EventConverter.convertToDocument(value);
         codec.encode(writer, document, encoderContext);
     }
 
