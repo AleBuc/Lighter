@@ -1,48 +1,66 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
+import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Kafka consumption service
+ *
+ * @author AleBuc
+ */
 @Slf4j
-public enum KafkaService {
-    INSTANCE;
+@Service
+@RequiredArgsConstructor
+public class KafkaService {
 
+    @Getter
     private boolean isListening = false;
+    private final KafkaConfiguration kafkaConfiguration;
+    private final Map<String, KafkaConsumer<Object, Object>> consumerMap = new HashMap<>();
+    @Getter
+    private final List<KafkaMessageListenerContainer<Object, Object>> containers = new ArrayList<>();
+    private final DefaultKafkaConsumerFactory<Object, Object> defaultKafkaConsumerFactory;
 
-    public void consumeTopic(String bootstrapServer, String topic) {
-        isListening = true;
-        KafkaConfiguration kafkaConfiguration = KafkaConfiguration.INSTANCE;
-        KafkaConsumer<String, Object> consumer = kafkaConfiguration.getConsumer(bootstrapServer);
-        try (consumer) {
-            consumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {
-                @Override
-                public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                    //NOOP
-                }
-                @Override
-                public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                    consumer.seekToBeginning(partitions);
-                }
-            });
-            while (isListening) {
-                ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(100));
-                for (ConsumerRecord<String, Object> event : records) {
-                    log.info("New event! Key: {}, Value: {}", event.key(), event.value());
-                }
-            }
-        }
+    /**
+     * Creates and adds a kafka topic consumer to {@link KafkaMessageListenerContainer}.
+     * @param topic topic name to add
+     */
+    public void addTopicConsumer(String topic) {
+        ContainerProperties containerProperties = new ContainerProperties(topic);
+        containerProperties.setAssignmentCommitOption(ContainerProperties.AssignmentCommitOption.NEVER);
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL);
+        KafkaMessageListenerContainer<Object, Object> kafkaMessageListenerContainer = new KafkaMessageListenerContainer<>(defaultKafkaConsumerFactory, containerProperties);
+        BlockingQueue<ConsumerRecord<Object, Object>> records = new LinkedBlockingQueue<>();
+        kafkaMessageListenerContainer.setupMessageListener((MessageListener<Object, Object>) message -> {
+            log.info("New event! Key: {}, Value: {}", message.key(), message.value());
+            records.add(message);
+        });
+        kafkaMessageListenerContainer.start();
+        containers.add(kafkaMessageListenerContainer);
+
     }
 
+    /**
+     * Stops all the consumers of the container.
+     */
     public void stopListener() {
-        isListening = false;
+        containers.forEach(AbstractMessageListenerContainer::stop);
     }
 }

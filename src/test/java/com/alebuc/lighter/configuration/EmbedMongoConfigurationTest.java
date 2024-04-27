@@ -1,58 +1,79 @@
 package com.alebuc.lighter.configuration;
 
-import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
-import de.flapdoodle.reverse.TransitionWalker;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.MongoClient;
+import de.flapdoodle.embed.mongo.distribution.Version;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.util.ReflectionUtils;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.MongoExceptionTranslator;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EmbedMongoConfigurationTest {
 
-    private final EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
+    @InjectMocks
+    private EmbedMongoConfiguration embedMongoConfiguration;
+    private ListAppender<ILoggingEvent> logWatcher;
 
-    @AfterAll
-    public static void tearDown() {
-        EmbedMongoConfiguration embedMongoConfiguration = EmbedMongoConfiguration.getInstance();
-        if (embedMongoConfiguration.getRunning() != null && embedMongoConfiguration.getRunning().current().isAlive()) {
-            embedMongoConfiguration.getRunning().close();
-        }
+    @BeforeEach
+    void init() {
+        this.logWatcher = new ListAppender<>();
+        this.logWatcher.start();
+        ((Logger) LoggerFactory.getLogger(EmbedMongoConfiguration.class)).addAppender(this.logWatcher);
     }
 
     @Test
-    @Order(1)
-    void shouldStartDatabase() {
-        assertThat(embedMongoConfiguration.getRunning()).isNull();
-        embedMongoConfiguration.startMongoDB();
-        assertThat(embedMongoConfiguration.getRunning()).isNotNull();
-        assertThat(embedMongoConfiguration.getRunning().current().isAlive()).isTrue();
-        assertThat(embedMongoConfiguration.getConnectionString()).isNotNull();
-    }
-
-    @Test
-    @Order(2)
-    void shouldStopDatabase() {
-        assertThat(embedMongoConfiguration.getRunning()).isNotNull();
+    void shouldGetMongoClient() {
+        //WHEN
+        MongoClient mongoClient = embedMongoConfiguration.getMongoClient(Version.V7_0_2);
+        ConnectionString connectionString = embedMongoConfiguration.getConnectionString();
         embedMongoConfiguration.closeMongoDB();
-        assertThat(embedMongoConfiguration.getRunning().current().isAlive()).isFalse();
+        //THEN
+        assertThat(mongoClient)
+                .isNotNull();
+        assertThat(connectionString)
+                .isNotNull();
+        assertThat(logWatcher.list)
+                .anySatisfy(iLoggingEvent -> {
+                    assertThat(iLoggingEvent.getLevel()).isEqualTo(Level.INFO);
+                    assertThat(iLoggingEvent.getFormattedMessage()).isEqualTo(String.format("Connection string: %s", connectionString));
+                });
+    }
+
+    @Test
+    void shouldGetMongoDatabaseFactory() {
+        //GIVEN
+        MongoClient mongoClient = Mockito.mock(MongoClient.class);
+        //WHEN
+        MongoDatabaseFactory mongoDatabaseFactory = embedMongoConfiguration.getMongoDatabaseFactory(mongoClient);
+        //THEN
+        assertThat(mongoDatabaseFactory)
+                .isNotNull();
+    }
+
+    @Test
+    void shouldGetMongoTemplate() {
+        //GIVEN
+        MongoDatabaseFactory mongoDatabaseFactory = Mockito.mock(MongoDatabaseFactory.class);
+        when(mongoDatabaseFactory.getExceptionTranslator()).thenReturn(new MongoExceptionTranslator());
+        //WHEN
+        MongoTemplate mongoTemplate = embedMongoConfiguration.getMongoTemplate(mongoDatabaseFactory);
+        //THEN
+        assertThat(mongoTemplate)
+                .isNotNull();
     }
 
 }

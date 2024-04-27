@@ -4,94 +4,80 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.alebuc.lighter.configuration.KafkaConfiguration;
+import com.alebuc.lighter.configuration.KafkaProperties;
 import com.alebuc.lighter.utils.JsonFormatter;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.AfterEach;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.beans.BeanUtils;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@Testcontainers
 class KafkaServiceTest {
 
     private ListAppender<ILoggingEvent> logWatcher;
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.1"));
-
-    String topicName = "testTopic";
-    String bootstrapServers;
-    KafkaProducer<String, String> producer;
 
     @BeforeEach
     void init() {
         this.logWatcher = new ListAppender<>();
         this.logWatcher.start();
         ((Logger) LoggerFactory.getLogger(KafkaService.class)).addAppender(this.logWatcher);
-        kafka.start();
-        bootstrapServers = kafka.getBootstrapServers();
-        producer = new KafkaProducer<>(
-                ImmutableMap.of(
-                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
-                        ProducerConfig.CLIENT_ID_CONFIG, "producer-test"
-                ),
-                new StringSerializer(),
-                new StringSerializer()
-        );
-    }
-
-    @AfterEach
-    void close() {
-        kafka.stop();
     }
 
     @Test
-    void shouldConsumeTopic() throws InterruptedException {
+    void shouldAddTopicConsumer() throws InterruptedException {
         //GIVEN
-        String testTopic = "testTopic";
+        try (MockedStatic<BeanUtils> mockedStatic = Mockito.mockStatic(BeanUtils.class)) {
+            String testTopic = "testTopic";
+            KafkaConsumer<Object, Object> kafkaConsumer = Mockito.mock(KafkaConsumer.class);
+            KafkaProperties.ConnectionProperties serverProperties = new KafkaProperties.ConnectionProperties();
+            serverProperties.setAddress("http://localhost:29092");
+            KafkaProperties kafkaProperties = new KafkaProperties();
+            kafkaProperties.setServer(serverProperties);
+            KafkaConfiguration kafkaConfiguration = new KafkaConfiguration(kafkaProperties);
+            KafkaService kafkaService = new KafkaService(kafkaConfiguration, kafkaConfiguration.getKafkaConsumerFactory());
 
-        String key1 = "key1";
-        Map<String, Object> testValueObject1 = new LinkedHashMap<>();
-        testValueObject1.put("id", "1234");
-        testValueObject1.put("count", 10);
-        String key2 = "key2";
-        String testValueObject2 = "value2";
-        producer.send(new ProducerRecord<>(topicName, key1, JsonFormatter.parseObjectToJson(testValueObject1)));
-        producer.send(new ProducerRecord<>(topicName, key2, testValueObject2));
+            //WHEN
+            kafkaService.addTopicConsumer(testTopic);
+            //THEN
+            assertThat(kafkaService.getContainers())
+                    .hasSize(1);
 
+        }
+    }
+
+    @Test
+    void shouldStopConsumers() {
+        //GIVEN
+        KafkaMessageListenerContainer<Object,Object> kafkaMessageListenerContainer = Mockito.mock(KafkaMessageListenerContainer.class);
+        List<KafkaMessageListenerContainer<Object,Object>> kafkaMessageListenerContainers = new ArrayList<>();
+        kafkaMessageListenerContainers.add(kafkaMessageListenerContainer);
+        KafkaService kafkaService = new KafkaService(mock(KafkaConfiguration.class), mock(DefaultKafkaConsumerFactory.class));
+        ReflectionTestUtils.setField(kafkaService, "containers", kafkaMessageListenerContainers);
         //WHEN
-        KafkaService kafkaService = KafkaService.INSTANCE;
-        Thread consumptionThread = new Thread(() -> kafkaService.consumeTopic(bootstrapServers, testTopic));
-        Thread stopThread = new Thread(kafkaService::stopListener);
-        consumptionThread.start();
-        Thread.sleep(1000);
-        stopThread.start();
-
+        kafkaService.stopListener();
         //THEN
-        List<ILoggingEvent> logs = logWatcher.list;
-        assertThat(logs)
-                .anySatisfy(iLoggingEvent -> {
-                    assertThat(iLoggingEvent.getLevel()).isEqualTo(Level.INFO);
-                    assertThat(iLoggingEvent.getFormattedMessage()).isEqualTo("New event! Key: key1, Value: {\"id\":\"1234\",\"count\":10}");
-                })
-                .anySatisfy(iLoggingEvent -> {
-                    assertThat(iLoggingEvent.getLevel()).isEqualTo(Level.INFO);
-                    assertThat(iLoggingEvent.getFormattedMessage()).isEqualTo("New event! Key: key2, Value: value2");
-                });
+        verify(kafkaMessageListenerContainer).stop();
+
 
     }
 
