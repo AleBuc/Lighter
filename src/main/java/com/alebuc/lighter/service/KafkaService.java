@@ -1,27 +1,30 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
-public enum KafkaService {
-    INSTANCE;
+@Service
+@RequiredArgsConstructor
+public class KafkaService {
 
     private boolean isListening = false;
+    private final KafkaConfiguration kafkaConfiguration;
 
-    public void consumeTopic(String bootstrapServer, String topic) {
+    public void consumeTopic(String topic) {
         isListening = true;
-        KafkaConfiguration kafkaConfiguration = KafkaConfiguration.INSTANCE;
-        KafkaConsumer<String, Object> consumer = kafkaConfiguration.getConsumer(bootstrapServer);
+        KafkaConsumer<String, Object> consumer = kafkaConfiguration.getConsumer();
         try (consumer) {
             consumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {
                 @Override
