@@ -24,7 +24,7 @@ public class KafkaConfiguration {
     private static final String GROUP_ID = "Lighter";
     private final KafkaProperties kafkaProperties;
 
-    public KafkaConsumer<String, Object> getConsumer() {
+    public KafkaConsumer<Object, Object> getConsumer() {
         Properties properties = new Properties();
         KafkaProperties.ConnectionProperties serverProperties = kafkaProperties.getServer();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverProperties.getAddress());
@@ -34,7 +34,7 @@ public class KafkaConfiguration {
                     String.format("%s required username=\"%s\" password= \"%s\";", PlainLoginModule.class.getName(), serverProperties.getUsername(), serverProperties.getPassword()));
         }
         KafkaProperties.ConnectionProperties schemaRegistryProperties = kafkaProperties.getSchemaRegistry();
-        if (StringUtils.isNotBlank(schemaRegistryProperties.getAddress())) {
+        if (schemaRegistryProperties != null && StringUtils.isNotBlank(schemaRegistryProperties.getAddress())) {
             properties.setProperty(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryProperties.getAddress());
             if (StringUtils.isNotBlank(schemaRegistryProperties.getUsername()) && StringUtils.isNotBlank(schemaRegistryProperties.getPassword())) {
                 properties.setProperty(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, SslConfigs.DEFAULT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM);

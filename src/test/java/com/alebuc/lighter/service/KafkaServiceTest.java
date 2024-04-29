@@ -45,7 +45,7 @@ class KafkaServiceTest {
     }
 
     @Test
-    void shouldConsumeTopic() throws InterruptedException {
+    void shouldAddTopicConsumer() throws InterruptedException {
         //GIVEN
         String testTopic = "testTopic";
         KafkaConsumer<String, Object> kafkaConsumer = Mockito.mock(KafkaConsumer.class);
@@ -66,7 +66,7 @@ class KafkaServiceTest {
         });
 
         //WHEN
-        Thread consumptionThread = new Thread(() -> kafkaService.consumeTopic(testTopic));
+        Thread consumptionThread = new Thread(() -> kafkaService.addTopicConsumer(testTopic));
         Thread stopThread = new Thread(kafkaService::stopListener);
         consumptionThread.start();
         Thread.sleep(100);

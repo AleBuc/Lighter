@@ -12,6 +12,7 @@ public class Lighter {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(Lighter.class);
         System.setProperty("spring.config.name","config");
+        System.setProperty("spring.main.allow-bean-definition-overriding","true");
         application.setBannerMode(Banner.Mode.CONSOLE);
         application.run(args);
     }

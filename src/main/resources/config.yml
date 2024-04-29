@@ -1,0 +1,5 @@
+kafka:
+  server:
+    address: http://localhost:29092
+    username:
+    password:

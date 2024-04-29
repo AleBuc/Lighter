@@ -24,7 +24,7 @@ class CustomQuitTest {
     private EmbedMongoConfiguration mongoConfiguration;
 
     @Test
-    void shouldQuit() {
+    void shouldQuit() throws InterruptedException {
         //GIVEN
         ListAppender<ILoggingEvent> logWatcher = new ListAppender<>();
         logWatcher.start();

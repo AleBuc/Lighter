@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
+import de.flapdoodle.embed.mongo.distribution.Version;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +38,7 @@ class EmbedMongoConfigurationTest {
     @Test
     void shouldGetMongoClient() {
         //WHEN
-        MongoClient mongoClient = embedMongoConfiguration.getMongoClient();
+        MongoClient mongoClient = embedMongoConfiguration.getMongoClient(Version.V7_0_2);
         ConnectionString connectionString = embedMongoConfiguration.getConnectionString();
         embedMongoConfiguration.closeMongoDB();
         //THEN
@@ -51,22 +52,6 @@ class EmbedMongoConfigurationTest {
                     assertThat(iLoggingEvent.getFormattedMessage()).isEqualTo(String.format("Connection string: %s", connectionString));
                 });
     }
-//    @AfterAll
-//    public static void tearDown() {
-//        if (embedMongoConfiguration.getRunning() != null && embedMongoConfiguration.getRunning().current().isAlive()) {
-//            embedMongoConfiguration.getRunning().close();
-//        }
-//    }
-//
-//    @Test
-//    @Order(1)
-//    void shouldStartDatabase() {
-//        assertThat(embedMongoConfiguration.getRunning()).isNull();
-//        embedMongoConfiguration.startMongoDB();
-//        assertThat(embedMongoConfiguration.getRunning()).isNotNull();
-//        assertThat(embedMongoConfiguration.getRunning().current().isAlive()).isTrue();
-//        assertThat(embedMongoConfiguration.getConnectionString()).isNotNull();
-//    }
 
     @Test
     void shouldGetMongoDatabaseFactory() {

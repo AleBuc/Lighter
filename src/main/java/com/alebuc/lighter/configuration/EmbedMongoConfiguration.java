@@ -33,13 +33,18 @@ public class EmbedMongoConfiguration {
     private ConnectionString connectionString;
 
     @Bean
-    public MongoClient getMongoClient() {
-        Transitions transitions = Mongod.instance().transitions(Version.Main.V7_0)
+    public MongoClient getMongoClient(Version version) {
+        Transitions transitions = Mongod.instance().transitions(version)
                 .replace(Start.to(ProcessOutput.class).initializedWith(ProcessOutput.silent()).withTransitionLabel("no output"));
         running = transitions.walker().initState(StateID.of(RunningMongodProcess.class));
         connectionString = createConnectionString(running.current().getServerAddress());
         log.info("Connection string: {}", connectionString);
         return MongoClients.create(connectionString);
+    }
+
+    @Bean
+    public Version getVersion() {
+        return Version.V7_0_2;
     }
 
     @Bean

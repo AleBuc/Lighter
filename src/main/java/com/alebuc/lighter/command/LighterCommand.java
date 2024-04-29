@@ -4,39 +4,38 @@ import com.alebuc.lighter.configuration.EmbedMongoConfiguration;
 import com.alebuc.lighter.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.shell.ExitRequest;
 import org.springframework.shell.command.annotation.Command;
 import org.springframework.shell.standard.commands.Quit;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Command(group = "Lighter")
 @RequiredArgsConstructor
 public class LighterCommand {
 
-    static List<Thread> kafkaConsumers = new ArrayList<>();
-
     private final KafkaService kafkaService;
 
     @Command(command = "consume", description = "Consume a given topic.")
     public void consume(String topicName) {
-        Thread consumerThread = new Thread(() -> kafkaService.consumeTopic(topicName));
-        kafkaConsumers.add(consumerThread);
-        consumerThread.start();
-
+        kafkaService.addTopicConsumer(topicName);
+        if (!kafkaService.isListening()){
+            Thread thread = new Thread(kafkaService::consumeTopics);
+            thread.start();
+        }
     }
 
     @Command
     @RequiredArgsConstructor
     public static class CustomQuit implements Quit.Command {
         private final EmbedMongoConfiguration mongoConfiguration;
+        private final KafkaService kafkaService;
         @Command
-        public void quit() {
+        public void quit() throws InterruptedException {
             log.info("Closing consumers...");
-            kafkaConsumers.forEach(Thread::interrupt);
+            kafkaService.stopListener();
             log.info("Closing the database...");
             mongoConfiguration.closeMongoDB();
+            throw new ExitRequest();
         }
     }
 }
