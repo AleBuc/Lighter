@@ -18,10 +18,6 @@ public class LighterCommand {
     @Command(command = "consume", description = "Consume a given topic.")
     public void consume(String topicName) {
         kafkaService.addTopicConsumer(topicName);
-        if (!kafkaService.isListening()){
-            Thread thread = new Thread(kafkaService::consumeTopics);
-            thread.start();
-        }
     }
 
     @Command

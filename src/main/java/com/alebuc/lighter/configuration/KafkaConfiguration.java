@@ -13,8 +13,12 @@ import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.security.plain.PlainLoginModule;
 import org.apache.kafka.common.security.plain.internals.PlainSaslServer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @Configuration
@@ -24,7 +28,7 @@ public class KafkaConfiguration {
     private static final String GROUP_ID = "Lighter";
     private final KafkaProperties kafkaProperties;
 
-    public KafkaConsumer<Object, Object> getConsumer() {
+    public Properties getProperties() {
         Properties properties = new Properties();
         KafkaProperties.ConnectionProperties serverProperties = kafkaProperties.getServer();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverProperties.getAddress());
@@ -50,7 +54,20 @@ public class KafkaConfiguration {
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        return new KafkaConsumer<>(properties);
+        return properties;
+    }
+
+    public KafkaConsumer<Object, Object> getConsumer() {
+        return new KafkaConsumer<>(getProperties());
+    }
+
+    @Bean
+    public DefaultKafkaConsumerFactory<Object, Object> getKafkaConsumerFactory() {
+        HashMap<String, Object> map = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : getProperties().entrySet()) {
+            map.put(String.valueOf(entry.getKey()), entry.getValue());
+        }
+        return new DefaultKafkaConsumerFactory<>(map);
     }
 
 }
