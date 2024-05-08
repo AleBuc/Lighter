@@ -23,8 +23,10 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,15 +50,16 @@ class KafkaServiceTest {
     void shouldAddTopicConsumer() throws InterruptedException {
         //GIVEN
         String testTopic = "testTopic";
-        KafkaConsumer<String, Object> kafkaConsumer = Mockito.mock(KafkaConsumer.class);
-        when(kafkaConfiguration.getConsumer()).thenReturn(kafkaConsumer);
+        KafkaConsumer<Object, Object> kafkaConsumer = Mockito.mock(KafkaConsumer.class);
+        Properties props = mock(Properties.class);
+        when(kafkaConfiguration.getProperties()).thenReturn(props);
         String key1 = "key1";
         Map<String, Object> testValueObject1 = new LinkedHashMap<>();
         testValueObject1.put("id", "1234");
         testValueObject1.put("count", 10);
         String key2 = "key2";
         String testValueObject2 = "value2";
-        ConsumerRecords<String, Object> consumerRecords = new ConsumerRecords<>(Map.of(
+        ConsumerRecords<Object, Object> consumerRecords = new ConsumerRecords<>(Map.of(
                 new TopicPartition(testTopic, 0), List.of(new ConsumerRecord<>(testTopic, 0, 0, key1, JsonFormatter.parseObjectToJson(testValueObject1))),
                 new TopicPartition(testTopic, 1), List.of(new ConsumerRecord<>(testTopic, 1, 0, key2, testValueObject2))
         ));
