@@ -1,6 +1,0 @@
-logging:
-  level:
-    org.springframework: ERROR
-    de.flapdoodle: ERROR
-    com.mongodb: ERROR
-    com.alebuc: INFO

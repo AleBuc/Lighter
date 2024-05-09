@@ -1,6 +1,5 @@
 package com.alebuc.lighter.configuration;
 
-import com.alebuc.lighter.Lighter;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -33,6 +32,11 @@ public class EmbedMongoConfiguration {
     private TransitionWalker.ReachedState<RunningMongodProcess> running;
     private ConnectionString connectionString;
 
+    /**
+     * Creates and displays the connection string of the embedded MongoDB database.
+     * @param version MongoDB version
+     * @return the linked MongoClient
+     */
     @Bean
     public MongoClient getMongoClient(Version version) {
         Transitions transitions = Mongod.instance().transitions(version)
@@ -43,22 +47,38 @@ public class EmbedMongoConfiguration {
         return MongoClients.create(connectionString);
     }
 
+    /**
+     * Gets the MongoDB version.
+     * @return the used MongoDB version
+     */
     @Bean
     public Version getVersion() {
         return Version.V7_0_2;
     }
 
+    /**
+     * Initializes MongoDatabaseFactory.
+     * @param mongoClient {@link MongoClient} linked to the database
+     * @return a new {@link MongoDatabaseFactory}
+     */
     @Bean
     public MongoDatabaseFactory getMongoDatabaseFactory(MongoClient mongoClient) {
         return new SimpleMongoClientDatabaseFactory(mongoClient, "Lighter");
     }
 
-
+    /**
+     * Creates the MongoTemplate.
+     * @param mongoDatabaseFactory the {@link MongoDatabaseFactory} linked to the embedded database
+     * @return the new {@link MongoTemplate}
+     */
     @Bean
     public MongoTemplate getMongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
         return new MongoTemplate(mongoDatabaseFactory);
     }
 
+    /**
+     * Closes the embedded MongoDB database if it is running.
+     */
     public void closeMongoDB() {
         if (!Objects.isNull(running) && running.current().isAlive()) {
             running.close();

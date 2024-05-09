@@ -28,6 +28,10 @@ public class KafkaConfiguration {
     private static final String GROUP_ID = "Lighter";
     private final KafkaProperties kafkaProperties;
 
+    /**
+     * Gets Kafka properties in function of given server and schema registry data.
+     * @return Properties
+     */
     public Properties getProperties() {
         Properties properties = new Properties();
         KafkaProperties.ConnectionProperties serverProperties = kafkaProperties.getServer();
@@ -57,6 +61,10 @@ public class KafkaConfiguration {
         return properties;
     }
 
+    /**
+     * Creates the KafkaConsumerFactory.
+     * @return {@link DefaultKafkaConsumerFactory}
+     */
     @Bean
     public DefaultKafkaConsumerFactory<Object, Object> getKafkaConsumerFactory() {
         HashMap<String, Object> map = new HashMap<>();

@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.*;
-import org.springframework.kafka.support.TopicPartitionOffset;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +20,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Kafka consumption service
+ *
+ * @author AleBuc
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +38,10 @@ public class KafkaService {
     private final List<KafkaMessageListenerContainer<Object, Object>> containers = new ArrayList<>();
     private final DefaultKafkaConsumerFactory<Object, Object> defaultKafkaConsumerFactory;
 
+    /**
+     * Creates and adds a kafka topic consumer to {@link KafkaMessageListenerContainer}.
+     * @param topic topic name to add
+     */
     public void addTopicConsumer(String topic) {
         ContainerProperties containerProperties = new ContainerProperties(topic);
         containerProperties.setAssignmentCommitOption(ContainerProperties.AssignmentCommitOption.NEVER);
@@ -41,12 +52,14 @@ public class KafkaService {
             log.info("New event! Key: {}, Value: {}", message.key(), message.value());
             records.add(message);
         });
-        MessageListener messageListener = (MessageListener) kafkaMessageListenerContainer.getContainerProperties().getMessageListener();
         kafkaMessageListenerContainer.start();
         containers.add(kafkaMessageListenerContainer);
 
     }
 
+    /**
+     * Stops all the consumers of the container.
+     */
     public void stopListener() {
         containers.forEach(AbstractMessageListenerContainer::stop);
     }

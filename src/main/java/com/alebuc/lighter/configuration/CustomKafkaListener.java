@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Configuration to always read a topic from offset 0
+ */
 @Component
 public class CustomKafkaListener extends AbstractConsumerSeekAware {
     @Override

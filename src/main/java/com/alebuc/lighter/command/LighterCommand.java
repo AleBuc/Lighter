@@ -8,6 +8,11 @@ import org.springframework.shell.ExitRequest;
 import org.springframework.shell.command.annotation.Command;
 import org.springframework.shell.standard.commands.Quit;
 
+/**
+ * Lighter Spring Shell commands
+ *
+ * @author AleBuc
+ */
 @Slf4j
 @Command(group = "Lighter")
 @RequiredArgsConstructor
@@ -15,11 +20,18 @@ public class LighterCommand {
 
     private final KafkaService kafkaService;
 
+    /**
+     * Consumes a topic from its name.
+     * @param topicName topic's name
+     */
     @Command(command = "consume", description = "Consume a given topic.")
     public void consume(String topicName) {
         kafkaService.addTopicConsumer(topicName);
     }
 
+    /**
+     * Customization of quit command to stop consumers and embedded database when quit.
+     */
     @Command(group = "Built-In Commands")
     @RequiredArgsConstructor
     public static class CustomQuit implements Quit.Command {
