@@ -34,9 +34,7 @@ public class KafkaService {
     public void addTopicConsumer(String topic) {
         ContainerProperties containerProperties = new ContainerProperties(topic);
         containerProperties.setAssignmentCommitOption(ContainerProperties.AssignmentCommitOption.NEVER);
-        containerProperties.setMessageListener(new MessageListener<>() {
-
-        });
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL);
         KafkaMessageListenerContainer<Object, Object> kafkaMessageListenerContainer = new KafkaMessageListenerContainer<>(defaultKafkaConsumerFactory, containerProperties);
         BlockingQueue<ConsumerRecord<Object, Object>> records = new LinkedBlockingQueue<>();
         kafkaMessageListenerContainer.setupMessageListener((MessageListener<Object, Object>) message -> {
