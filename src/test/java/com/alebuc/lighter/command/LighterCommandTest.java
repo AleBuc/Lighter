@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -27,8 +28,6 @@ class LighterCommandTest {
         //WHEN
         lighterCommand.consume(TOPIC_NAME);
         //THEN
-        List<Thread> threads = (List<Thread>) ReflectionTestUtils.getField(lighterCommand, "kafkaConsumers");
-        assertThat(threads).isNotEmpty()
-                .hasSize(1);
+        Mockito.verify(kafkaService).addTopicConsumer(TOPIC_NAME);
     }
 }

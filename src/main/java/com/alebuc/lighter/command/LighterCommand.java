@@ -20,12 +20,12 @@ public class LighterCommand {
         kafkaService.addTopicConsumer(topicName);
     }
 
-    @Command
+    @Command(group = "Built-In Commands")
     @RequiredArgsConstructor
     public static class CustomQuit implements Quit.Command {
         private final EmbedMongoConfiguration mongoConfiguration;
         private final KafkaService kafkaService;
-        @Command
+        @Command(command = "quit", alias = "exit", description = "Exit the shell.")
         public void quit() throws InterruptedException {
             log.info("Closing consumers...");
             kafkaService.stopListener();

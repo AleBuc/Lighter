@@ -3,3 +3,15 @@ kafka:
     address: http://localhost:29092
     username:
     password:
+  schema-registry:
+    address: http://localhost:8085
+    username:
+    password:
+
+logging:
+  level:
+#    org.springframework: OFF
+#    de.flapdoodle: ERROR
+#    com.mongodb: OFF
+    com.alebuc: INFO
+    root: OFF

@@ -1,5 +1,6 @@
 package com.alebuc.lighter.configuration;
 
+import com.alebuc.lighter.Lighter;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;

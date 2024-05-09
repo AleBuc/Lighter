@@ -57,10 +57,6 @@ public class KafkaConfiguration {
         return properties;
     }
 
-    public KafkaConsumer<Object, Object> getConsumer() {
-        return new KafkaConsumer<>(getProperties());
-    }
-
     @Bean
     public DefaultKafkaConsumerFactory<Object, Object> getKafkaConsumerFactory() {
         HashMap<String, Object> map = new HashMap<>();
