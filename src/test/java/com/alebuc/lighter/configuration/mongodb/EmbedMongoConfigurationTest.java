@@ -1,4 +1,4 @@
-package com.alebuc.lighter.configuration;
+package com.alebuc.lighter.configuration.mongodb;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

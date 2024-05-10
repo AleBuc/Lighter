@@ -1,4 +1,4 @@
-package com.alebuc.lighter.configuration;
+package com.alebuc.lighter.configuration.kafka;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

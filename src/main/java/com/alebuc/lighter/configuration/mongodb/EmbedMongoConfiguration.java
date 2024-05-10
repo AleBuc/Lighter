@@ -1,6 +1,7 @@
-package com.alebuc.lighter.configuration;
+package com.alebuc.lighter.configuration.mongodb;
 
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import de.flapdoodle.embed.mongo.commands.ServerAddress;
@@ -15,6 +16,10 @@ import de.flapdoodle.reverse.transitions.Start;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -31,6 +36,7 @@ public class EmbedMongoConfiguration {
 
     private TransitionWalker.ReachedState<RunningMongodProcess> running;
     private ConnectionString connectionString;
+    private final CustomCodecProvider customCodecProvider;
 
     /**
      * Creates and displays the connection string of the embedded MongoDB database.
@@ -44,7 +50,10 @@ public class EmbedMongoConfiguration {
         running = transitions.walker().initState(StateID.of(RunningMongodProcess.class));
         connectionString = createConnectionString(running.current().getServerAddress());
         log.info("Connection string: {}", connectionString);
-        return MongoClients.create(connectionString);
+        CodecRegistry codecRegistry = MongoClientSettings.getDefaultCodecRegistry();
+        codecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(customCodecProvider));
+        MongoClientSettings settings = MongoClientSettings.builder().codecRegistry(codecRegistry).applyConnectionString(connectionString).build();
+        return MongoClients.create(settings);
     }
 
     /**

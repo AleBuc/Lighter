@@ -1,31 +1,25 @@
 package com.alebuc.lighter.service;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.alebuc.lighter.configuration.KafkaConfiguration;
-import com.alebuc.lighter.configuration.KafkaProperties;
-import com.alebuc.lighter.utils.JsonFormatter;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import com.alebuc.lighter.configuration.kafka.KafkaConfiguration;
+import com.alebuc.lighter.configuration.kafka.KafkaProperties;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +29,8 @@ import static org.mockito.Mockito.*;
 class KafkaServiceTest {
 
     private ListAppender<ILoggingEvent> logWatcher;
+    @Mock
+    private MongoTemplate mongoTemplate;
 
     @BeforeEach
     void init() {
@@ -54,7 +50,7 @@ class KafkaServiceTest {
             KafkaProperties kafkaProperties = new KafkaProperties();
             kafkaProperties.setServer(serverProperties);
             KafkaConfiguration kafkaConfiguration = new KafkaConfiguration(kafkaProperties);
-            KafkaService kafkaService = new KafkaService(kafkaConfiguration, kafkaConfiguration.getKafkaConsumerFactory());
+            KafkaService kafkaService = new KafkaService(kafkaConfiguration, kafkaConfiguration.getKafkaConsumerFactory(), mongoTemplate);
 
             //WHEN
             kafkaService.addTopicConsumer(testTopic);
@@ -71,7 +67,7 @@ class KafkaServiceTest {
         KafkaMessageListenerContainer<Object,Object> kafkaMessageListenerContainer = Mockito.mock(KafkaMessageListenerContainer.class);
         List<KafkaMessageListenerContainer<Object,Object>> kafkaMessageListenerContainers = new ArrayList<>();
         kafkaMessageListenerContainers.add(kafkaMessageListenerContainer);
-        KafkaService kafkaService = new KafkaService(mock(KafkaConfiguration.class), mock(DefaultKafkaConsumerFactory.class));
+        KafkaService kafkaService = new KafkaService(mock(KafkaConfiguration.class), mock(DefaultKafkaConsumerFactory.class), mongoTemplate);
         ReflectionTestUtils.setField(kafkaService, "containers", kafkaMessageListenerContainers);
         //WHEN
         kafkaService.stopListener();

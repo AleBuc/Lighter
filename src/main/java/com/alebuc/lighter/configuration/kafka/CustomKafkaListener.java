@@ -1,4 +1,4 @@
-package com.alebuc.lighter.configuration;
+package com.alebuc.lighter.configuration.kafka;
 
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.kafka.listener.AbstractConsumerSeekAware;

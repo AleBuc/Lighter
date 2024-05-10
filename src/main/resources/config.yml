@@ -14,4 +14,4 @@ logging:
 #    de.flapdoodle: ERROR
 #    com.mongodb: OFF
     com.alebuc: INFO
-    root: OFF
+    root: INFO

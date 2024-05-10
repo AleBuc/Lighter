@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.alebuc.lighter.configuration.EmbedMongoConfiguration;
+import com.alebuc.lighter.configuration.mongodb.EmbedMongoConfiguration;
 import com.alebuc.lighter.service.KafkaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
