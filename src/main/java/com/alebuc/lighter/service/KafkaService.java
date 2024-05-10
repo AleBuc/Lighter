@@ -1,11 +1,15 @@
 package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.KafkaConfiguration;
+import com.alebuc.lighter.entity.EventEntity;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -13,10 +17,7 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -37,6 +38,7 @@ public class KafkaService {
     @Getter
     private final List<KafkaMessageListenerContainer<Object, Object>> containers = new ArrayList<>();
     private final DefaultKafkaConsumerFactory<Object, Object> defaultKafkaConsumerFactory;
+    private final MongoTemplate mongoTemplate;
 
     /**
      * Creates and adds a kafka topic consumer to {@link KafkaMessageListenerContainer}.
@@ -50,6 +52,8 @@ public class KafkaService {
         BlockingQueue<ConsumerRecord<Object, Object>> records = new LinkedBlockingQueue<>();
         kafkaMessageListenerContainer.setupMessageListener((MessageListener<Object, Object>) message -> {
             log.info("New event! Key: {}, Value: {}", message.key(), message.value());
+            EventEntity eventEntity = EventEntity.fromConsumerRecord(message);
+            getMongoCollection(topic).insertOne(eventEntity);
             records.add(message);
         });
         kafkaMessageListenerContainer.start();
@@ -62,5 +66,14 @@ public class KafkaService {
      */
     public void stopListener() {
         containers.forEach(AbstractMessageListenerContainer::stop);
+    }
+
+    private MongoCollection<EventEntity> getMongoCollection(String topic) {
+        MongoDatabase database = mongoTemplate.getDb();
+        Set<String> collectionNames = mongoTemplate.getCollectionNames();
+        if (!collectionNames.contains(topic)) {
+            database.createCollection(topic);
+        }
+        return database.getCollection(topic, EventEntity.class);
     }
 }
