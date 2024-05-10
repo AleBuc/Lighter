@@ -1,5 +1,7 @@
 package com.alebuc.lighter.entity;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
@@ -7,12 +9,15 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.record.TimestampType;
+import org.json.JSONException;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Document
 @Builder
 public record EventEntity(
         Object key,
@@ -31,6 +36,7 @@ public record EventEntity(
                 .partition(consumerRecord.partition())
                 .offset(consumerRecord.offset())
                 .headers(getHeaderMap(consumerRecord.headers()));
+        //fixme bad time format
         if (consumerRecord.timestampType().equals(TimestampType.CREATE_TIME)) {
             builder.createTime(Instant.ofEpochSecond(consumerRecord.timestamp()));
         } else if (TimestampType.LOG_APPEND_TIME.equals(consumerRecord.timestampType())) {
@@ -51,14 +57,18 @@ public record EventEntity(
 
     private static Object mapData(Object object) {
         if (object instanceof String string) {
-            return string ;
+            try {
+                return convertToMap(string);
+            } catch (Exception e) {
+                return string ;
+            }
         } else {
-            return convertToMap(object);
+            return object;
         }
     }
 
-    private static Map<String, Object> convertToMap(Object object) {
+    private static Map<String, Object> convertToMap(String s) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.convertValue(object, new TypeReference<>() {});
+        return mapper.readValue(s, new TypeReference<HashMap<String, Object>>() {});
     }
 }

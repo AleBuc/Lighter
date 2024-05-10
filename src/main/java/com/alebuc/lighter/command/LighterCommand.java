@@ -1,6 +1,6 @@
 package com.alebuc.lighter.command;
 
-import com.alebuc.lighter.configuration.EmbedMongoConfiguration;
+import com.alebuc.lighter.configuration.mongodb.EmbedMongoConfiguration;
 import com.alebuc.lighter.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

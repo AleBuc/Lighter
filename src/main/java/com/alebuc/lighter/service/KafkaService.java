@@ -1,6 +1,6 @@
 package com.alebuc.lighter.service;
 
-import com.alebuc.lighter.configuration.KafkaConfiguration;
+import com.alebuc.lighter.configuration.kafka.KafkaConfiguration;
 import com.alebuc.lighter.entity.EventEntity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
