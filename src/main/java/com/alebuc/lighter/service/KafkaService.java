@@ -2,6 +2,7 @@ package com.alebuc.lighter.service;
 
 import com.alebuc.lighter.configuration.kafka.KafkaConfiguration;
 import com.alebuc.lighter.entity.EventEntity;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class KafkaService {
     private final List<KafkaMessageListenerContainer<Object, Object>> containers = new ArrayList<>();
     private final DefaultKafkaConsumerFactory<Object, Object> defaultKafkaConsumerFactory;
     private final MongoTemplate mongoTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Creates and adds a kafka topic consumer to {@link KafkaMessageListenerContainer}.
@@ -52,7 +54,7 @@ public class KafkaService {
         BlockingQueue<ConsumerRecord<Object, Object>> records = new LinkedBlockingQueue<>();
         kafkaMessageListenerContainer.setupMessageListener((MessageListener<Object, Object>) message -> {
             log.info("New event! Key: {}, Value: {}", message.key(), message.value());
-            EventEntity eventEntity = EventEntity.fromConsumerRecord(message);
+            EventEntity eventEntity = EventEntity.fromConsumerRecord(message, objectMapper);
             getMongoCollection(topic).insertOne(eventEntity);
             records.add(message);
         });

@@ -1,6 +1,5 @@
 package com.alebuc.lighter.entity;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +8,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.record.TimestampType;
-import org.json.JSONException;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.nio.charset.Charset;
@@ -29,20 +27,19 @@ public record EventEntity(
         Instant logAppendTime,
         Map<String, String> headers
 ) {
-    public static EventEntity fromConsumerRecord(ConsumerRecord<?, ?> consumerRecord) {
+    public static EventEntity fromConsumerRecord(ConsumerRecord<?, ?> consumerRecord, ObjectMapper objectMapper) {
         EventEntityBuilder builder = EventEntity.builder()
-                .key(mapData(consumerRecord.key()))
-                .value(mapData(consumerRecord.value()))
+                .key(mapData(consumerRecord.key(), objectMapper))
+                .value(mapData(consumerRecord.value(), objectMapper))
                 .partition(consumerRecord.partition())
                 .offset(consumerRecord.offset())
                 .headers(getHeaderMap(consumerRecord.headers()));
-        //fixme bad time format
         if (consumerRecord.timestampType().equals(TimestampType.CREATE_TIME)) {
-            builder.createTime(Instant.ofEpochSecond(consumerRecord.timestamp()));
+            builder.createTime(Instant.ofEpochMilli(consumerRecord.timestamp()));
         } else if (TimestampType.LOG_APPEND_TIME.equals(consumerRecord.timestampType())) {
-            builder.logAppendTime(Instant.ofEpochSecond(consumerRecord.timestamp()));
+            builder.logAppendTime(Instant.ofEpochMilli(consumerRecord.timestamp()));
         } else {
-            builder.timestamp(Instant.ofEpochSecond(consumerRecord.timestamp()));
+            builder.timestamp(Instant.ofEpochMilli(consumerRecord.timestamp()));
         }
         return builder.build();
     }
@@ -55,10 +52,10 @@ public record EventEntity(
         return map;
     }
 
-    private static Object mapData(Object object) {
+    private static Object mapData(Object object, ObjectMapper objectMapper) {
         if (object instanceof String string) {
             try {
-                return convertToMap(string);
+                return convertToMap(string, objectMapper);
             } catch (Exception e) {
                 return string ;
             }
@@ -67,8 +64,7 @@ public record EventEntity(
         }
     }
 
-    private static Map<String, Object> convertToMap(String s) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(s, new TypeReference<HashMap<String, Object>>() {});
+    private static Map<String, Object> convertToMap(String s, ObjectMapper objectMapper) throws JsonProcessingException {
+        return objectMapper.readValue(s, new TypeReference<HashMap<String, Object>>() {});
     }
 }
