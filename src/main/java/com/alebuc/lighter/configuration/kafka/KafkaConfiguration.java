@@ -2,6 +2,7 @@ package com.alebuc.lighter.configuration.kafka;
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -11,10 +12,10 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.security.plain.PlainLoginModule;
 import org.apache.kafka.common.security.plain.internals.PlainSaslServer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,13 +51,14 @@ public class KafkaConfiguration {
                 properties.setProperty(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
                 properties.setProperty(SchemaRegistryClientConfig.USER_INFO_CONFIG, String.format("%s:%s", schemaRegistryProperties.getUsername(), schemaRegistryProperties.getPassword()));
             }
+            properties.setProperty(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, KafkaAvroDeserializer.class.getName());
+            properties.setProperty(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, KafkaAvroDeserializer.class.getName());
         }
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverProperties.getAddress());
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        properties.setProperty(CommonClientConfigs.RETRIES_CONFIG, "0");
         return properties;
     }
 
@@ -66,11 +68,16 @@ public class KafkaConfiguration {
      */
     @Bean
     public DefaultKafkaConsumerFactory<Object, Object> getKafkaConsumerFactory() {
+        HashMap<String, Object> map = getPropertiesMap();
+        return new DefaultKafkaConsumerFactory<>(map);
+    }
+
+    public HashMap<String, Object> getPropertiesMap() {
         HashMap<String, Object> map = new HashMap<>();
         for (Map.Entry<Object, Object> entry : getProperties().entrySet()) {
             map.put(String.valueOf(entry.getKey()), entry.getValue());
         }
-        return new DefaultKafkaConsumerFactory<>(map);
+        return map;
     }
 
 }
