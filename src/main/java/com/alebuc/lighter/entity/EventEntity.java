@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
+import org.apache.avro.generic.GenericData;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
@@ -20,6 +21,8 @@ import java.util.Map;
 public record EventEntity(
         Object key,
         Object value,
+        String keySubject,
+        String valueSubject,
         int partition,
         long offset,
         Instant timestamp,
@@ -31,6 +34,8 @@ public record EventEntity(
         EventEntityBuilder builder = EventEntity.builder()
                 .key(mapData(consumerRecord.key(), objectMapper))
                 .value(mapData(consumerRecord.value(), objectMapper))
+                .keySubject(getSubject(consumerRecord.key()))
+                .valueSubject(getSubject(consumerRecord.value()))
                 .partition(consumerRecord.partition())
                 .offset(consumerRecord.offset())
                 .headers(getHeaderMap(consumerRecord.headers()));
@@ -59,9 +64,22 @@ public record EventEntity(
             } catch (Exception e) {
                 return string ;
             }
+        } else if (object instanceof GenericData.Record record) {
+            try {
+                return convertToMap(record.toString(), objectMapper);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             return object;
         }
+    }
+
+    private static String getSubject(Object object) {
+        if (object instanceof GenericData.Record record) {
+            return record.getSchema().getFullName();
+        }
+        return null;
     }
 
     private static Map<String, Object> convertToMap(String s, ObjectMapper objectMapper) throws JsonProcessingException {

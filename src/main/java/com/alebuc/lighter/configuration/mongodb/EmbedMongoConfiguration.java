@@ -16,8 +16,6 @@ import de.flapdoodle.reverse.transitions.Start;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.Document;
-import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.context.annotation.Bean;
@@ -50,8 +48,9 @@ public class EmbedMongoConfiguration {
         running = transitions.walker().initState(StateID.of(RunningMongodProcess.class));
         connectionString = createConnectionString(running.current().getServerAddress());
         log.info("Connection string: {}", connectionString);
-        CodecRegistry codecRegistry = MongoClientSettings.getDefaultCodecRegistry();
-        codecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(customCodecProvider));
+        log.info("Use 'help [command]' to display commands or the function details.");
+        log.info("Use 'exit' or 'quit' to correctly close the application.\n");
+        CodecRegistry codecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(customCodecProvider));
         MongoClientSettings settings = MongoClientSettings.builder().codecRegistry(codecRegistry).applyConnectionString(connectionString).build();
         return MongoClients.create(settings);
     }

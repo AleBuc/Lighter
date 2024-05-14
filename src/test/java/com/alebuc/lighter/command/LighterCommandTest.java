@@ -7,11 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class LighterCommandTest {
@@ -26,8 +21,8 @@ class LighterCommandTest {
     @Test
     void shouldConsumeTopic() {
         //WHEN
-        lighterCommand.consume(TOPIC_NAME);
+        lighterCommand.consume(TOPIC_NAME, null, null);
         //THEN
-        Mockito.verify(kafkaService).addTopicConsumer(TOPIC_NAME);
+        Mockito.verify(kafkaService).addTopicConsumer(TOPIC_NAME, null, null);
     }
 }
