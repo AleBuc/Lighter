@@ -25,12 +25,21 @@ public class LighterCommand {
      * Consumes a topic from its name.
      * @param topicName topic's name
      */
-    @Command(command = "consume", description = "Consume a given topic.")
+    @Command(command = "consume", description = "Consume a given topic (use 'help consume' for more details).")
     public void consume(
             String topicName,
             @Option(longNames = "key-type", shortNames = 'k', description = "Key type of the events topic", defaultValue = "string") String keyType,
             @Option(longNames = "value-type", shortNames = 'v', description = "Value type of the events topic", defaultValue = "string") String valueType) {
         kafkaService.addTopicConsumer(topicName, keyType, valueType);
+    }
+
+    /**
+     * Stops a topic listener.
+     * @param topicName topic name
+     */
+    @Command(command = "stop", description = "Stop a running listener.")
+    public void stopListener(String topicName) {
+        kafkaService.stopListener(topicName);
     }
 
     /**

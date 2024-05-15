@@ -67,6 +67,20 @@ public class KafkaService {
     }
 
     /**
+     * Stops a listener if it's running.
+     * @param topic topic name of the listener
+     */
+    public void stopListener(String topic) {
+        KafkaMessageListenerContainer<Object, Object> kafkaMessageListenerContainer = containersMap.get(topic);
+        if (kafkaMessageListenerContainer != null) {
+            kafkaMessageListenerContainer.stop();
+            log.info("Stopped listener for topic {}.", topic);
+        } else {
+            log.info("No listener found for topic {}.", topic);
+        }
+    }
+
+    /**
      * Stops all the consumers of the container.
      */
     public void stopListener() {

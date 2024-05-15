@@ -53,9 +53,9 @@ class KafkaServiceTest {
             KafkaService kafkaService = new KafkaService(kafkaConfiguration, kafkaConfiguration.getKafkaConsumerFactory(), mongoTemplate);
 
             //WHEN
-            kafkaService.addTopicConsumer(testTopic);
+            kafkaService.addTopicConsumer(testTopic, "string", "string");
             //THEN
-            assertThat(kafkaService.getContainers())
+            assertThat(kafkaService.getContainersMap())
                     .hasSize(1);
 
         }
@@ -65,10 +65,10 @@ class KafkaServiceTest {
     void shouldStopConsumers() {
         //GIVEN
         KafkaMessageListenerContainer<Object,Object> kafkaMessageListenerContainer = Mockito.mock(KafkaMessageListenerContainer.class);
-        List<KafkaMessageListenerContainer<Object,Object>> kafkaMessageListenerContainers = new ArrayList<>();
-        kafkaMessageListenerContainers.add(kafkaMessageListenerContainer);
+        Map<String, KafkaMessageListenerContainer<Object,Object>> kafkaMessageListenerContainers = new HashMap<>();
+        kafkaMessageListenerContainers.put("topic", kafkaMessageListenerContainer);
         KafkaService kafkaService = new KafkaService(mock(KafkaConfiguration.class), mock(DefaultKafkaConsumerFactory.class), mongoTemplate);
-        ReflectionTestUtils.setField(kafkaService, "containers", kafkaMessageListenerContainers);
+        ReflectionTestUtils.setField(kafkaService, "containersMap", kafkaMessageListenerContainers);
         //WHEN
         kafkaService.stopListener();
         //THEN
