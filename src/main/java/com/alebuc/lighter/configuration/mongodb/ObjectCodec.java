@@ -1,13 +1,12 @@
 package com.alebuc.lighter.configuration.mongodb;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonReader;
-import org.bson.BsonType;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.types.Decimal128;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -17,57 +16,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class ObjectCodec implements Codec<Object> {
     @Override
     public Object decode(BsonReader bsonReader, DecoderContext decoderContext) {
-        return null;
-    }
-
-    private Object read(BsonReader bsonReader) {
-        BsonType bsonType = bsonReader.getCurrentBsonType();
-        switch (bsonType) {
-            case ARRAY -> {
-                ArrayList<Object> arrayList = new ArrayList<>();
-                bsonReader.readStartArray();
-                while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-                    arrayList.add(read(bsonReader));
-                }
-                bsonReader.readEndArray();
-                return arrayList;
-            }
-            case DOCUMENT -> {
-                HashMap<String, Object> document = new HashMap<>();
-                bsonReader.readStartDocument();
-                while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-                    document.put(bsonReader.readName(), read(bsonReader));
-                }
-                bsonReader.readEndDocument();
-                return document;
-            }
-            case INT32 -> bsonReader.readInt32();
-
-            case INT64 -> bsonReader.readInt64();
-
-            case STRING -> bsonReader.readString();
-
-            case BOOLEAN -> bsonReader.readBoolean();
-
-            case BINARY -> bsonReader.readBinaryData();
-
-            case DATE_TIME -> bsonReader.readDateTime();
-
-            case DOUBLE -> bsonReader.readDouble();
-
-            case DECIMAL128 -> bsonReader.readDecimal128();
-
-            case OBJECT_ID -> bsonReader.readObjectId();
-
-            case TIMESTAMP -> bsonReader.readTimestamp();
-
-            default -> {
-                return null;
-            }
-        }
         return null;
     }
 
@@ -85,9 +37,9 @@ public class ObjectCodec implements Codec<Object> {
             case BigDecimal bigDecimal -> bsonWriter.writeDecimal128(Decimal128.parse(bigDecimal.toString()));
             case Double dbl -> bsonWriter.writeDouble(dbl);
             case Float flt -> bsonWriter.writeDouble(flt);
-            case HashMap<?,?> hm -> {
+            case HashMap<?, ?> hm -> {
                 bsonWriter.writeStartDocument();
-                for (Map.Entry<?,?> entry : hm.entrySet()) {
+                for (Map.Entry<?, ?> entry : hm.entrySet()) {
                     String key = entry.getKey().toString();
                     Object value = entry.getValue();
                     bsonWriter.writeName(key);
@@ -102,6 +54,7 @@ public class ObjectCodec implements Codec<Object> {
                 }
                 bsonWriter.writeEndArray();
             }
+            case null -> bsonWriter.writeNull();
             default -> {
                 if (o.getClass().isArray()) {
                     bsonWriter.writeStartArray();
@@ -134,7 +87,7 @@ public class ObjectCodec implements Codec<Object> {
                         }
                         bsonWriter.writeEndDocument();
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 }
             }
