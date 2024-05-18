@@ -1,3 +1,7 @@
+spring:
+  application:
+    version: "@lighter.version@"
+
 kafka:
   server:
     address: http://localhost:29092

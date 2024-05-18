@@ -1,0 +1,8 @@
+    __    _       __    __
+   / /   (_)___ _/ /_  / /____  _____
+  / /   / / __ `/ __ \/ __/ _ \/ ___/
+ / /___/ / /_/ / / / / /_/  __/ /
+/_____/_/\__, /_/ /_/\__/\___/_/
+        /____/
+Lighter ${spring.application.version} by AleBuc
+Powered by Spring Boot ${spring-boot.version}

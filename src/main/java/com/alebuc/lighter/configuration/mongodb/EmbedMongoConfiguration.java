@@ -48,6 +48,8 @@ public class EmbedMongoConfiguration {
         running = transitions.walker().initState(StateID.of(RunningMongodProcess.class));
         connectionString = createConnectionString(running.current().getServerAddress());
         log.info("Connection string: {}", connectionString);
+        log.info("Use 'help [command]' to display commands or the function details.");
+        log.info("Use 'exit' or 'quit' to correctly close the application.\n");
         CodecRegistry codecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(customCodecProvider));
         MongoClientSettings settings = MongoClientSettings.builder().codecRegistry(codecRegistry).applyConnectionString(connectionString).build();
         return MongoClients.create(settings);
