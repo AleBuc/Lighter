@@ -12,6 +12,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
       - name: Maven Release version and Build
         run: |
           mvn versions:set -DremoveSnapshot
