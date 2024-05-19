@@ -5,7 +5,7 @@ on:
 
 jobs:
   release:
-    runs-on: [Linux, standard]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/chechout@v4
