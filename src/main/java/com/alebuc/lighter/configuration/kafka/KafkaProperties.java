@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaProperties {
-
+    private String groupId;
     private ConnectionProperties server;
     private ConnectionProperties schemaRegistry;
 

@@ -14,6 +14,7 @@ Add a file `config.yml` in the same folder as the .jar file.
 Fill it with connection settings as following: 
 ```yaml
 kafka:
+  group-id: lighter
   server:
     address: http://localhost:29092
     username: 
