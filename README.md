@@ -49,9 +49,11 @@ By default, the deserializer is set for `string` type.
 To modify the key or value type, add `-k {type}` or `-v {type}` and replace `{type}` by `integer` or `avro`.
 The avro type will only work if the schema registry configuration is filled.
 
-### `stop {topicName}`
+### `stop [topicName]`
 
 Use `stop` command to end a topic consumption. If you do this due to a type configuration mistake, remove the collection with the topic name before to re-run it with the new configuration.
+
+If no given topic name, all consumers will stop.
 
 ### `exit` or `quit`
 When you have finished with your monitoring, use one of these commands to close the application.
