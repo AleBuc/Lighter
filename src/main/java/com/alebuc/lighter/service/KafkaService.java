@@ -8,6 +8,7 @@ import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
@@ -71,12 +72,17 @@ public class KafkaService {
      * @param topic topic name of the listener
      */
     public void stopListener(String topic) {
-        KafkaMessageListenerContainer<Object, Object> kafkaMessageListenerContainer = containersMap.get(topic);
-        if (kafkaMessageListenerContainer != null) {
-            kafkaMessageListenerContainer.stop();
-            log.info("Stopped listener for topic {}.", topic);
+        if (StringUtils.isNotBlank(topic)) {
+            KafkaMessageListenerContainer<Object, Object> kafkaMessageListenerContainer = containersMap.get(topic);
+            if (kafkaMessageListenerContainer != null) {
+                kafkaMessageListenerContainer.stop();
+                log.info("Stopped listener for topic {}.", topic);
+            } else {
+                log.info("No listener found for topic {}.", topic);
+            }
         } else {
-            log.info("No listener found for topic {}.", topic);
+            stopListener();
+            log.info("All listeners stopped.");
         }
     }
 

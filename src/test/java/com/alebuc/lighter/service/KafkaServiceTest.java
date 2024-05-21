@@ -86,4 +86,21 @@ class KafkaServiceTest {
         verify(kafkaMessageListenerContainer2, never()).stop();
     }
 
+    @Test
+    void shouldStopAllConsumers() {
+        //GIVEN
+        KafkaMessageListenerContainer<Object,Object> kafkaMessageListenerContainer1 = Mockito.mock(KafkaMessageListenerContainer.class);
+        KafkaMessageListenerContainer<Object,Object> kafkaMessageListenerContainer2 = Mockito.mock(KafkaMessageListenerContainer.class);
+        Map<String, KafkaMessageListenerContainer<Object,Object>> kafkaMessageListenerContainers = new HashMap<>();
+        kafkaMessageListenerContainers.put("topic1", kafkaMessageListenerContainer1);
+        kafkaMessageListenerContainers.put("topic2", kafkaMessageListenerContainer2);
+        KafkaService kafkaService = new KafkaService(mock(KafkaConfiguration.class), mock(DefaultKafkaConsumerFactory.class), mongoTemplate);
+        ReflectionTestUtils.setField(kafkaService, "containersMap", kafkaMessageListenerContainers);
+        //WHEN
+        kafkaService.stopListener(null);
+        //THEN
+        verify(kafkaMessageListenerContainer1).stop();
+        verify(kafkaMessageListenerContainer2).stop();
+    }
+
 }

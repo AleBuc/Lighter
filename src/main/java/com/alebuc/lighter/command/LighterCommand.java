@@ -38,7 +38,7 @@ public class LighterCommand {
      * @param topicName topic name
      */
     @Command(command = "stop", description = "Stop a running listener.")
-    public void stopListener(String topicName) {
+    public void stopListener(@Option(longNames = "topicName", shortNames = 't', description = "name of a topic to stop") String topicName) {
         kafkaService.stopListener(topicName);
     }
 
