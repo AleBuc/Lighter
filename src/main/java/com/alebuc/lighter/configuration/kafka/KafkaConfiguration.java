@@ -25,7 +25,7 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class KafkaConfiguration {
 
-    private static final String GROUP_ID = "Lighter";
+    private static final String DEFAULT_GROUP_ID = "Lighter";
     private final KafkaProperties kafkaProperties;
 
     /**
@@ -55,7 +55,7 @@ public class KafkaConfiguration {
             properties.setProperty(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, KafkaAvroDeserializer.class.getName());
         }
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, serverProperties.getAddress());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, StringUtils.isNotBlank(kafkaProperties.getGroupId()) ? kafkaProperties.getGroupId() : DEFAULT_GROUP_ID);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         properties.setProperty(CommonClientConfigs.RETRIES_CONFIG, "0");
