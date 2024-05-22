@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Document
@@ -83,6 +84,6 @@ public record EventEntity(
     }
 
     private static Map<String, Object> convertToMap(String s, ObjectMapper objectMapper) throws JsonProcessingException {
-        return objectMapper.readValue(s, new TypeReference<HashMap<String, Object>>() {});
+        return objectMapper.readValue(s, new TypeReference<LinkedHashMap<String, Object>>() {});
     }
 }

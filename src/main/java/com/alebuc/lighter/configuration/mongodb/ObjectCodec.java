@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Slf4j
@@ -37,7 +37,7 @@ public class ObjectCodec implements Codec<Object> {
             case BigDecimal bigDecimal -> bsonWriter.writeDecimal128(Decimal128.parse(bigDecimal.toString()));
             case Double dbl -> bsonWriter.writeDouble(dbl);
             case Float flt -> bsonWriter.writeDouble(flt);
-            case HashMap<?, ?> hm -> {
+            case LinkedHashMap<?, ?> hm -> {
                 bsonWriter.writeStartDocument();
                 for (Map.Entry<?, ?> entry : hm.entrySet()) {
                     String key = entry.getKey().toString();
